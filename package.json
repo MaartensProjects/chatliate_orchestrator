@@ -1,0 +1,27 @@
+{
+  "name": "chatliate_orchestrator",
+  "version": "1.0.0",
+  "description": "chatliates orchestrator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bull": "3.18.0",
+    "randomstring": "1.1.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaartensProjects/chatliate_orchestrator.git"
+  },
+  "keywords": [
+    "rasa"
+  ],
+  "author": "maartensprojects",
+  "license": "UNLICENCED",
+  "bugs": {
+    "url": "https://github.com/MaartensProjects/chatliate_orchestrator/issues"
+  },
+  "homepage": "https://github.com/MaartensProjects/chatliate_orchestrator#readme"
+}
