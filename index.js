@@ -170,15 +170,15 @@ inboundRasaActionQueue.process(async (qmsg) => {
                 query._id = originalreq.tracker.slots.retrieved_conversation.match(/<id.*>((.|\n)*?)<\/id>/)[1]
 
                 var conversationsubject = "No subject"
-                var clientsettings = {}
+                var tenantsettings = {}
 
                 if (originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/) != null) {
                     conversationsubject = originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/)[1]
                 }
 
 
-                if (originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/) != null) {
-                    clientsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/)[1]))
+                if (originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/) != null) {
+                    tenantsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/)[1]))
                 }
 
                 query.updatepushquerynewvalues = { "conversation": { timestamp: Date.now(), user: originalreq.tracker.slots.conversation_email, text: originalreq.tracker.latest_message.text, chatliateresponse: "false" } }
@@ -188,7 +188,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     //dont send to the poster of the message
                     if (usr.email != originalreq.tracker.slots.conversation_email) {
                         //post new message comms to communicator
-                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, clientsettings: clientsettings, conversationsubject: conversationsubject, conversationid: query._id }))
+                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, tenantsettings: tenantsettings, conversationsubject: conversationsubject, conversationid: query._id }))
                     }
 
                 });
@@ -322,15 +322,15 @@ inboundRasaActionQueue.process(async (qmsg) => {
                 query._id = originalreq.tracker.slots.retrieved_conversation.match(/<id.*>((.|\n)*?)<\/id>/)[1]
 
                 var conversationsubject = "No subject"
-                var clientsettings = {}
+                var tenantsettings = {}
 
                 if (originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/) != null) {
                     conversationsubject = originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/)[1]
                 }
 
 
-                if (originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/) != null) {
-                    clientsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/)[1]))
+                if (originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/) != null) {
+                    tenantsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/)[1]))
                 }
 
                 query.updatepushquerynewvalues = { "conversation": { timestamp: Date.now(), user: originalreq.tracker.slots.conversation_email, text: originalreq.tracker.latest_message.text, chatliateresponse: "false" } }
@@ -340,7 +340,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     //dont send to the poster of the message
                     if (usr.email != originalreq.tracker.slots.conversation_email) {
                         //post new message comms to communicator
-                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, clientsettings: clientsettings, conversationsubject: conversationsubject, conversationid: query._id }))
+                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, tenantsettings: tenantsettings, conversationsubject: conversationsubject, conversationid: query._id }))
                     }
 
                 });
@@ -640,7 +640,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                 //copy info from chatbot
                                 if (JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference != null) {
                                     if (JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0] != null) {
-                                        anonymisedquestion.clientid = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid
+                                        anonymisedquestion.tenantid = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid
                                         anonymisedquestion.email = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email
                                         anonymisedquestion.chatbotid = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid
                                         anonymisedquestion.language = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].language
@@ -801,7 +801,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     entity: "statsUtterance",
                                     action: "insert",
                                     chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                    clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                    tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
                                     type:'standardAnswer',
@@ -1026,10 +1026,10 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     var conversationlinkchatbotowner = "";
                                     var conversationlinkcandidate = "";
 
-                                    var clientsettings = {}
+                                    var tenantsettings = {}
 
-                                    if (chatbot.clientsettings != null) {
-                                        clientsettings = chatbot.clientsettings
+                                    if (chatbot.tenantsettings != null) {
+                                        tenantsettings = chatbot.tenantsettings
                                     }
 
                                     if (chatbot.url != null) {
@@ -1053,10 +1053,10 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     }
 
                                     //post new candidate comms to communicator
-                                    postToCommunicatorQueue(user, JSON.stringify({ commstype: "newCandidateForChatbot", tracker: originalreq.tracker, clientsettings: clientsettings, receiverid: chatbot.email, chatbot: chatbot, match_percentage: originalreq.tracker.slots.match_percentage, messagesender: JSON.parse(originalreq.tracker.slots.authcode).email, conversationsubject: chatbot.title, conversationlink: conversationlinkchatbotowner, candidateemail: JSON.parse(originalreq.tracker.slots.authcode).email }))
+                                    postToCommunicatorQueue(user, JSON.stringify({ commstype: "newCandidateForChatbot", tracker: originalreq.tracker, tenantsettings: tenantsettings, receiverid: chatbot.email, chatbot: chatbot, match_percentage: originalreq.tracker.slots.match_percentage, messagesender: JSON.parse(originalreq.tracker.slots.authcode).email, conversationsubject: chatbot.title, conversationlink: conversationlinkchatbotowner, candidateemail: JSON.parse(originalreq.tracker.slots.authcode).email }))
 
                                     //copy candidate in
-                                    postToCommunicatorQueue(user, JSON.stringify({ commstype: "conversationCopyApplicant", tracker: originalreq.tracker, clientsettings: clientsettings, receiverid: JSON.parse(originalreq.tracker.slots.authcode).email, chatbot: chatbot, match_percentage: originalreq.tracker.slots.match_percentage }))
+                                    postToCommunicatorQueue(user, JSON.stringify({ commstype: "conversationCopyApplicant", tracker: originalreq.tracker, tenantsettings: tenantsettings, receiverid: JSON.parse(originalreq.tracker.slots.authcode).email, chatbot: chatbot, match_percentage: originalreq.tracker.slots.match_percentage }))
 
                                     //persist chat for followup
                                     delete query.setvalue
@@ -1079,11 +1079,11 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                         query.matched_answer_keywords = JSON.parse(originalreq.tracker.slots.matched_answer_keywords)
                                     }
 
-                                    if (chatbot.clientid != null) {
-                                        query.clientid = chatbot.clientid
+                                    if (chatbot.tenantid != null) {
+                                        query.tenantid = chatbot.tenantid
 
-                                        if (chatbot.clientsettings != null) {
-                                            query.clientsettings = chatbot.clientsettings
+                                        if (chatbot.tenantsettings != null) {
+                                            query.tenantsettings = chatbot.tenantsettings
                                         }
                                     }
 
@@ -1143,10 +1143,10 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                     if (isValidEmail(originalreq.tracker.latest_message.text)) {
                                         var authcode = randomstring.generate({ length: 8, charset: 'numeric' })
-                                        var clientsettings = {}
+                                        var tenantsettings = {}
 
-                                        if (chatbot.clientsettings != null) {
-                                            clientsettings = chatbot.clientsettings
+                                        if (chatbot.tenantsettings != null) {
+                                            tenantsettings = chatbot.tenantsettings
                                         }
 
                                         actionvars.slotname = "authcode"
@@ -1155,7 +1155,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                         actionvars.nextactionp = "instruct_utter_authcode_email"
 
                                         //post auth email to communicator
-                                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "sendAuthCodeApplicant", clientsettings: clientsettings, tracker: originalreq.tracker, receiverid: originalreq.tracker.latest_message.text, chatbot: chatbot, authcode: authcode }))
+                                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "sendAuthCodeApplicant", tenantsettings: tenantsettings, tracker: originalreq.tracker, receiverid: originalreq.tracker.latest_message.text, chatbot: chatbot, authcode: authcode }))
                                     } else {
                                         actionvars.nextactionp = "instruct_utter_validation_email"
                                     }
@@ -1326,14 +1326,14 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                 var convid = originalreq.tracker.slots.retrieved_conversation.match(/<id.*>((.|\n)*?)<\/id>/)[1]
                 var conversationsubject = "No subject"
-                var clientsettings = {}
+                var tenantsettings = {}
 
                 if (originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/) != null) {
                     conversationsubject = originalreq.tracker.slots.retrieved_conversation.match(/<conversationsubject.*>((.|\n)*?)<\/conversationsubject>/)[1]
                 }
 
-                if (originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/) != null) {
-                    clientsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<clientsettings.*>((.|\n)*?)<\/clientsettings>/)[1]))
+                if (originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/) != null) {
+                    tenantsettings = JSON.parse(decodeURIComponent(originalreq.tracker.slots.retrieved_conversation.match(/<tenantsettings.*>((.|\n)*?)<\/tenantsettings>/)[1]))
                 }
 
 
@@ -1348,10 +1348,10 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     //dont send to the poster of the message
                     if (usr.email != originalreq.tracker.slots.conversation_email) {
                         //post new message comms to communicator
-                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, clientsettings: clientsettings, conversationsubject: conversationsubject, conversationid: convid }))
+                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "newMessagePersistedChat", tracker: originalreq.tracker, receiverid: usr.email, user: usr, messagesender: originalreq.tracker.slots.conversation_email, tenantsettings: tenantsettings, conversationsubject: conversationsubject, conversationid: convid }))
                     } else {
                         //cancel messages due outbound for this conversation to responding user, as he's already active
-                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "cancelMessagesForUserConversation", tracker: originalreq.tracker, clientsettings: clientsettings, receiverid: usr.email, user: usr, conversationid: convid }))
+                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "cancelMessagesForUserConversation", tracker: originalreq.tracker, tenantsettings: tenantsettings, receiverid: usr.email, user: usr, conversationid: convid }))
                     }
 
                 });
@@ -1625,9 +1625,9 @@ inboundRasaActionQueue.process(async (qmsg) => {
                 query.chatbotid = JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference;
                 query.users = { $elemMatch: { email: JSON.parse(qmsg.data.msg).tracker.slots.conversation_email, conversationnonce: JSON.parse(qmsg.data.msg).tracker.slots.conversation_nonce } }
 
-                //if user has clientid, only show conversations associated with that clientid
-                if (JSON.parse(user).clientid != null) {
-                    query.clientid = JSON.parse(user).clientid
+                //if user has tenantid, only show conversations associated with that tenantid
+                if (JSON.parse(user).tenantid != null) {
+                    query.tenantid = JSON.parse(user).tenantid
                 }
             } else {
                 if (process.env.ERRORLOGGING == "TRUE") { console.log('error at retrieve_conversation: missing chatbot reference, conversationnonce or email'); }
@@ -1715,9 +1715,9 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
             }
 
-            //if user has clientid, only show chatbots associated with that clientid
-            if (JSON.parse(user).clientid != null) {
-                query.clientid = JSON.parse(user).clientid
+            //if user has tenantid, only show chatbots associated with that tenantid
+            if (JSON.parse(user).tenantid != null) {
+                query.tenantid = JSON.parse(user).tenantid
             }
 
             //if user has language set, only show chatbots associated in that language
@@ -1882,7 +1882,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                             entity: "statsUserMatch",
                                             action: "insert",
                                             chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                            clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                            tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                             timestamp: Date.now(),
                                             match: mq,
@@ -1914,7 +1914,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                             entity: "statsUtterance",
                             action: "insert",
                             chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                            clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                            tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                             timestamp: Date.now(),
                             type:'standardQuestion',
@@ -1983,7 +1983,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     entity: "statsUtterance",
                                     action: "insert",
                                     chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                    clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                    tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
                                     type:'standardQuestion',
@@ -2022,7 +2022,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                                     entity: "statsUserMatch",
                                                     action: "insert",
                                                     chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                                    clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                                    tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                                     timestamp: Date.now(),
                                                     match: mq,
@@ -2054,7 +2054,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     entity: "statsUtterance",
                                     action: "insert",
                                     chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                    clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                    tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
                                     type:'standardQuestion',
@@ -2108,7 +2108,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                 entity: "statsUtterance",
                                 action: "insert",
                                 chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                 email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                 timestamp: Date.now(),
                                 type:'standardQuestion',
@@ -2147,7 +2147,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                             entity: "statsUserMatch",
                                             action: "insert",
                                             chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                                            clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                                            tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                             timestamp: Date.now(),
                                             match: mq,
@@ -2179,7 +2179,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                             entity: "statsUtterance",
                             action: "insert",
                             chatbotid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].chatbotid,
-                            clientid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].clientid,
+                            tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                             timestamp: Date.now(),
                             type:'standardQuestion',
@@ -2875,8 +2875,8 @@ function formatResponse(res, displayas, tracker) {
                     r = r + "<conversationsubject>" + res[0].conversationsubject + "</conversationsubject>";
                 }
 
-                if (res[0].clientsettings != null) {
-                    r = r + "<clientsettings>" + encodeURIComponent(JSON.stringify(res[0].clientsettings)) + "</clientsettings>";
+                if (res[0].tenantsettings != null) {
+                    r = r + "<tenantsettings>" + encodeURIComponent(JSON.stringify(res[0].tenantsettings)) + "</tenantsettings>";
                 }
 
                 r = r + "<users>" + encodeURIComponent(JSON.stringify(res[0].users)) + "</users>";
