@@ -536,6 +536,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                         if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question != null) {
                             if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question != "") {
 
+                                //treat response as question
                                 if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.responseisalwaysquestion != null) {
 
                                     if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.responseisalwaysquestion == "true") {
@@ -547,6 +548,21 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                         //candidatequestionflag
                                         candidatequestion = true;
+                                    }
+                                }
+
+                                //save response as uservariable
+                                if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable != null) {
+                                    if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable == "true") {
+                                        if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != null) {
+                                            if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != "") {
+                                                var uservariables = JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)
+                                                uservariables[JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename] = latestuser.text
+
+                                                //update uservariables
+                                                postBackResults(callbackq, user, { setvalue: JSON.stringify(uservariables) }, originalreq, { slotname: "uservariables", nextactionp: "" });
+                                            }
+                                        }
                                     }
                                 }
 
@@ -804,7 +820,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
-                                    type:'standardAnswer',
+                                    type: 'standardAnswer',
                                     userid: JSON.parse(user).userid,
                                     prio: 2000,
                                     utterance: anonymisedquestion.chatliateanswer
@@ -1261,6 +1277,9 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                 } else {
                     //answer postback
+
+                    //set user vars in standardanswer
+                    standardanswer = fillUservariablesInOutboundMessage(standardanswer,JSON.parse(qmsg.data.msg).tracker.slots.uservariables)
 
                     //single answer postback
                     if (process.env.LOGGING == "TRUE") { console.log('Standardanswer set '); }
@@ -1917,7 +1936,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                             tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                             timestamp: Date.now(),
-                            type:'standardQuestion',
+                            type: 'standardQuestion',
                             userid: JSON.parse(decodeURIComponent(user)).userid,
                             utterance: "No more questions",
                             prio: 1000
@@ -1960,7 +1979,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                         if (process.env.LOGGING == "TRUE") { console.log('setting next question 1'); }
 
                         var naq = JSON.parse(qmsg.data.msg).tracker.slots.retrieved_chatbot_application_questions[0]
-                        query.setvalue = "<text>" + naq.question + "</text>";
+                        query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(qmsg.data.msg).tracker.slots.usersettings) + "</text>";
 
                         //check if presetanswers set on question
                         if (naq.presetanswers != null) {
@@ -1986,7 +2005,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
-                                    type:'standardQuestion',
+                                    type: 'standardQuestion',
                                     userid: JSON.parse(decodeURIComponent(user)).userid,
                                     prio: parseInt(naq.prio),
                                     utterance: naq.question
@@ -2057,7 +2076,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                     tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                     email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                     timestamp: Date.now(),
-                                    type:'standardQuestion',
+                                    type: 'standardQuestion',
                                     userid: JSON.parse(decodeURIComponent(user)).userid,
                                     utterance: "No more questions",
                                     prio: 1000
@@ -2084,7 +2103,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     if (process.env.LOGGING == "TRUE") { console.log('setting next question 2'); }
 
                     var naq = JSON.parse(qmsg.data.msg).tracker.slots.retrieved_chatbot_application_questions[0]
-                    query.setvalue = "<text>" + naq.question + "</text>";
+                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(qmsg.data.msg).tracker.slots.usersettings) + "</text>";
 
                     //check if presetanswers set on question
                     if (naq.presetanswers != null) {
@@ -2111,7 +2130,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                 tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                                 email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                                 timestamp: Date.now(),
-                                type:'standardQuestion',
+                                type: 'standardQuestion',
                                 userid: JSON.parse(decodeURIComponent(user)).userid,
                                 utterance: naq.question,
                                 prio: parseInt(naq.prio)
@@ -2182,7 +2201,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                             tenantid: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].tenantid,
                             email: JSON.parse(qmsg.data.msg).tracker.slots.chatbot_reference[0].email,
                             timestamp: Date.now(),
-                            type:'standardQuestion',
+                            type: 'standardQuestion',
                             userid: JSON.parse(decodeURIComponent(user)).userid,
                             utterance: "No more questions",
                             prio: 1000
@@ -2277,12 +2296,12 @@ inboundRasaActionQueue.process(async (qmsg) => {
                 }
 
                 if (originalreq.tracker.slots.chatbot_reference[0].tymsg != null) {
-                    query.setvalue = "<text>" + originalreq.tracker.slots.chatbot_reference[0].tymsg.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)) + "</text>"
+                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsg.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(qmsg.data.msg).tracker.slots.uservariables) + "</text>"
 
                     //special tymsg if threshold is set
                     if (originalreq.tracker.slots.chatbot_reference[0].usepointsthreshold != null && originalreq.tracker.slots.chatbot_reference[0].pointsthreshold != null && originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold != null) {
                         if (originalreq.tracker.slots.chatbot_reference[0].usepointsthreshold == 'true' && originalreq.tracker.slots.chatbot_reference[0].pointsthreshold >= JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints) {
-                            query.setvalue = "<text>" + originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)) + "</text>"
+                            query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(qmsg.data.msg).tracker.slots.uservariables) + "</text>"
                         }
                     }
                 }
@@ -2585,14 +2604,39 @@ function obfuscateEmail(s) {
         s.slice(endIndex);
 }
 //percentage issue in chatbotquestions and answers
-function cleanOutboundUserMessage(outboundmessage){
+function cleanOutboundUserMessage(outboundmessage) {
 
     //Quick fix - decode %
-    outboundmessage = outboundmessage.replace(/&percnt/gi,"%")
-  
+    outboundmessage = outboundmessage.replace(/&percnt/gi, "%")
+
     //retrun clean message
     return outboundmessage
-  }
+}
+
+//uservariables
+function fillUservariablesInOutboundMessage(outboundmessage,uservariables) {
+    try{
+        //check if uservariables included in outbound message
+        if (outboundmessage.includes("{[")) {
+            var possibleuservars = outboundmessage.match(/\{\[(.*?)\]\}/g)
+
+            if(possibleuservars!=null){
+                possibleuservars.forEach(puv => {
+                    if(uservariables[puv.replace("{[","").replace("]}","")]!=null){
+                        //replace placeholder with variable value
+                        outboundmessage.replace(puv,uservariables[puv.replace("{[","").replace("]}","")])
+                    }
+                });
+            }
+
+        }
+
+    }catch (e) {
+        if (process.env.ERRORLOGGING == "TRUE") { console.log('error fillUservariablesInOutboundMessage: ' + e); }
+    }
+
+    return outboundmessage
+}
 
 //return conversations from tracker
 function returnConversationAsObject(tracker, owner, respondent) {
