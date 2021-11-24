@@ -1279,7 +1279,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     //answer postback
 
                     //set user vars in standardanswer
-                    standardanswer = fillUservariablesInOutboundMessage(standardanswer,JSON.parse(qmsg.data.msg).tracker.slots.uservariables)
+                    standardanswer = fillUservariablesInOutboundMessage(standardanswer,JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables))
 
                     //single answer postback
                     if (process.env.LOGGING == "TRUE") { console.log('Standardanswer set '); }
@@ -1979,7 +1979,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                         if (process.env.LOGGING == "TRUE") { console.log('setting next question 1'); }
 
                         var naq = JSON.parse(qmsg.data.msg).tracker.slots.retrieved_chatbot_application_questions[0]
-                        query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(qmsg.data.msg).tracker.slots.usersettings) + "</text>";
+                        query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)) + "</text>";
 
                         //check if presetanswers set on question
                         if (naq.presetanswers != null) {
@@ -2103,7 +2103,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     if (process.env.LOGGING == "TRUE") { console.log('setting next question 2'); }
 
                     var naq = JSON.parse(qmsg.data.msg).tracker.slots.retrieved_chatbot_application_questions[0]
-                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(qmsg.data.msg).tracker.slots.usersettings) + "</text>";
+                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(naq.question,JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)) + "</text>";
 
                     //check if presetanswers set on question
                     if (naq.presetanswers != null) {
@@ -2296,12 +2296,12 @@ inboundRasaActionQueue.process(async (qmsg) => {
                 }
 
                 if (originalreq.tracker.slots.chatbot_reference[0].tymsg != null) {
-                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsg.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(qmsg.data.msg).tracker.slots.uservariables) + "</text>"
+                    query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsg.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)) + "</text>"
 
                     //special tymsg if threshold is set
                     if (originalreq.tracker.slots.chatbot_reference[0].usepointsthreshold != null && originalreq.tracker.slots.chatbot_reference[0].pointsthreshold != null && originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold != null) {
                         if (originalreq.tracker.slots.chatbot_reference[0].usepointsthreshold == 'true' && originalreq.tracker.slots.chatbot_reference[0].pointsthreshold >= JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints) {
-                            query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(qmsg.data.msg).tracker.slots.uservariables) + "</text>"
+                            query.setvalue = "<text>" + fillUservariablesInOutboundMessage(originalreq.tracker.slots.chatbot_reference[0].tymsgbelowpointsthreshold.replace(/<availablepoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.totalqualexpoints).replace(/<matchedpoints>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchqualexpoints).replace(/<percentage>/gi, JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.percentage).replace(/<matchedlist>/gi, JSON.stringify(JSON.parse(qmsg.data.msg).tracker.slots.match_percentage.matchedqualex)),JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)) + "</text>"
                         }
                     }
                 }
@@ -2616,17 +2616,26 @@ function cleanOutboundUserMessage(outboundmessage) {
 //uservariables
 function fillUservariablesInOutboundMessage(outboundmessage,uservariables) {
     try{
+        if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage. outboundmessage is' + outboundmessage+' uservariables is'+JSON.stringify(uservariables)); }
         //check if uservariables included in outbound message
         if (outboundmessage.includes("{[")) {
             var possibleuservars = outboundmessage.match(/\{\[(.*?)\]\}/g)
 
             if(possibleuservars!=null){
+                if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: possible uservars found' ); }
                 possibleuservars.forEach(puv => {
-                    if(uservariables[puv.replace("{[","").replace("]}","")]!=null){
+                    
+                    
+                    var puvname = puv.replace("{[","").replace("]}","")
+                    if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: possible uservar is ' +puv+ ' puvname is '+puvname); }
+
+                    if(uservariables[puvname]!=null){
                         //replace placeholder with variable value
-                        outboundmessage.replace(puv,uservariables[puv.replace("{[","").replace("]}","")])
+                        outboundmessage = outboundmessage.replace(puv,uservariables[puvname])
                     }
                 });
+            }else{
+                if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: no possible uservars found' ); }
             }
 
         }
