@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "bull": "3.18.0",
-    "randomstring": "1.1.5"
+    "bull": "4.1.4",
+    "randomstring": "1.2.1"
   },
   "repository": {
     "type": "git",
