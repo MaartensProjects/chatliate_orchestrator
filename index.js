@@ -515,6 +515,23 @@ inboundRasaActionQueue.process(async (qmsg) => {
                     }
                 });
 
+                //save response as uservariable
+                if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question!= null){
+                    if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable != null) {
+                        if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable == "true") {
+                            if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != null) {
+                                if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != "") {
+                                    var uservariables = JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)
+                                    uservariables[JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename] = latestuser.text
+
+                                    //update uservariables
+                                    postBackResults(callbackq, user, { setvalue: JSON.stringify(uservariables) }, originalreq, { slotname: "uservariables", nextactionp: "" });
+                                }
+                            }
+                        }
+                    }
+                }
+                                                
                 //check if user question has a standard answer
                 var standardanswer = ""
                 var standardanswerbuttons = ""
@@ -548,21 +565,6 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                         //candidatequestionflag
                                         candidatequestion = true;
-                                    }
-                                }
-
-                                //save response as uservariable
-                                if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable != null) {
-                                    if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.saveresponseasuservariable == "true") {
-                                        if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != null) {
-                                            if (JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename != "") {
-                                                var uservariables = JSON.parse(JSON.parse(qmsg.data.msg).tracker.slots.uservariables)
-                                                uservariables[JSON.parse(qmsg.data.msg).tracker.slots.last_chatbot_application_question.uservariablename] = latestuser.text
-
-                                                //update uservariables
-                                                postBackResults(callbackq, user, { setvalue: JSON.stringify(uservariables) }, originalreq, { slotname: "uservariables", nextactionp: "" });
-                                            }
-                                        }
                                     }
                                 }
 
@@ -2630,8 +2632,12 @@ function fillUservariablesInOutboundMessage(outboundmessage,uservariables) {
                     if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: possible uservar is ' +puv+ ' puvname is '+puvname); }
 
                     if(uservariables[puvname]!=null){
+                        if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: found a value for '+puvname+'. value is: '+uservariables[puvname]); }
+
                         //replace placeholder with variable value
                         outboundmessage = outboundmessage.replace(puv,uservariables[puvname])
+                    }else{
+                        if (process.env.LOGGING == "TRUE") { console.log('fillUservariablesInOutboundMessage: didnt find a value for '+puvname)+' Current stored user variables: '+JSON.stringify(uservariables); }
                     }
                 });
             }else{
