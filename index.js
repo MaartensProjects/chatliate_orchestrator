@@ -1171,9 +1171,9 @@ inboundRasaActionQueue.process(async (qmsg) => {
                                         query.setvalue = JSON.stringify({ email: originalreq.tracker.latest_message.text, code: authcode })
 
                                         actionvars.nextactionp = "instruct_utter_authcode_email"
-
+                                        
                                         //post auth email to communicator
-                                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "sendAuthCodeApplicant", user:user, tenantsettings: tenantsettings, tracker: originalreq.tracker, receiverid: originalreq.tracker.latest_message.text, chatbot: chatbot, authcode: authcode }))
+                                        postToCommunicatorQueue(user, JSON.stringify({ commstype: "sendAuthCodeApplicant", user:JSON.parse(user), tenantsettings: tenantsettings, tracker: originalreq.tracker, receiverid: originalreq.tracker.latest_message.text, chatbot: chatbot, authcode: authcode }))
                                     } else {
                                         actionvars.nextactionp = "instruct_utter_validation_email"
                                     }
