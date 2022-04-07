@@ -632,8 +632,35 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                     ans.keywords.forEach(kw => {
                                         var comparequestion = " " + latestuser.text.replace(/\W/gi, " ").toUpperCase() + " "
-                                        var comparekw = " " + kw.toUpperCase() + " "
-                                        if (comparequestion.match(comparekw) != null) {
+                                        var comparekw = " " + kw.toUpperCase().trim() + " "
+                                        var kwwmatch = false
+                                        var skipregmatch = false
+
+                                        //check if keyword contains an array of keywords
+                                            if(kw.match(/\[(.+)\]/gi)!=null){
+                                                
+                                                    try{
+                                                        if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Matching an AND combination array of keywords'); }
+                                                        //chek if all keywords in array match
+                                                        kwwmatch = true
+                                                        skipregmatch = true
+                                                        kw.match(/\[(.+)\]/gi)[0].substr(1, kw.match(/\[(.+)\]/gi)[0].length-2).split(",").forEach(kww => {
+                                                        if(comparequestion.match(" " + kww.toUpperCase().trim() + " ")==null){
+                                                            if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Matching an AND combination array of keywords: Couldnt find '+kww); }
+                                                            kwwmatch = false
+                                                        } 
+                                                        });
+                                                    }catch(e){
+                                                        if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Error Matching an AND combination array of keywords:'+e); }
+                                                    }
+                                                
+        
+                                            }else{
+                                                if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Matching a regular keyword:'+kw); }
+                                            }
+
+
+                                        if ((comparequestion.match(comparekw) != null && skipregmatch==false)||(skipregmatch && kwwmatch)) {
                                             if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Match found with standard answer'); }
                                             standardanswer = ans.answer
                                             matchfound = true
