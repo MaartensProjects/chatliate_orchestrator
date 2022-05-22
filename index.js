@@ -629,6 +629,7 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                     }
 
+                                    var kwmatchfound = false;
 
                                     ans.keywords.forEach(kw => {
                                         var comparequestion = " " + latestuser.text.replace(/\W/gi, " ").toUpperCase() + " "
@@ -662,7 +663,21 @@ inboundRasaActionQueue.process(async (qmsg) => {
 
                                         if ((comparequestion.match(comparekw) != null && skipregmatch==false)||(skipregmatch && kwwmatch)) {
                                             if (process.env.LOGGING == "TRUE") { console.log('Process_inform: Match found with standard answer'); }
-                                            standardanswer = ans.answer
+                                            
+                                            if(kwmatchfound==false){
+                                                if(matchfound==false){
+                                                    //delete standard message
+                                                    standardanswer = ans.answer
+                                                }
+    
+                                                if(matchfound){
+                                                    //append this answer to the existing answer
+                                                    standardanswer = standardanswer + ". " +ans.answer
+                                                }
+
+                                                kwmatchfound = true
+                                            }
+
                                             matchfound = true
 
                                             //if matched answer has a standard folowup question, set flag for posting fo both answer and followupquestion
